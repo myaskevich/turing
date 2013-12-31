@@ -1,6 +1,6 @@
 import mock
 
-from pytest import raises
+from nose.tools import raises
 
 from turing import Turing, Direction, Action
 from turing.action import transition
@@ -14,9 +14,11 @@ def test_number():
 
 def test_char():
     assert Turing().eval("a") == ['a']
-    with raises(AssertionError):
-        assert Turing().eval("abc") == ['a']
     assert Turing().eval("Z") == ['Z']
+
+@raises(AssertionError)
+def test_string():
+    assert Turing().eval("abc") == ['a']
 
 def test_move():
     turing = Turing()
