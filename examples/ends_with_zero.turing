@@ -1,0 +1,27 @@
+
+initial state does not end with zero
+{
+    if head is 0 then
+        assume ends with zero
+
+    else
+        assume does not ends with zero
+
+    endif
+
+    move right
+}
+
+
+final state ends with zero
+{
+    if head is 0 then
+        assume ends with zero
+
+    else
+        assume does not end with zero
+
+    endif
+
+    move right
+}
