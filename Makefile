@@ -1,3 +1,3 @@
 
 all:
-	py.test --tb=native
+	nosetests turing
