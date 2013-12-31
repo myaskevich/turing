@@ -8,7 +8,7 @@ rules = """\
     program = statement*
     _ = ~"\s*"
 
-    number = _ ~"[0-9]+" _
+    number = _ ~"[0-9]{1}" _
     char = _ ~"[a-zA-Z ]{1}"u _
     literal = number / char
 
@@ -27,16 +27,17 @@ rules = """\
     statement = movement / action / assume / literal
 """
 
-
-class Turing(object):
-
+class Translator(object):
     def parse(self, source):
         return Grammar(rules)['program'].parse(source)
 
     def eval(self, source):
         node = self.parse(source) if isinstance(source, basestring) else source
-        return ProgramVisitor(self).visit(node)
+        machine = Turing()
+        return ProgramVisitor(machine).visit(node)
 
+
+class Turing(Translator):
     def move(self, direction):
         if direction == Direction.RIGHT:
             print "moving right"
@@ -52,7 +53,7 @@ class Turing(object):
             print "erasing"
 
     def assume(self, state):
-        print 'assuming', state, 'state'
+        print 'assuming', state
 
 
 class Action:
@@ -78,7 +79,7 @@ class ProgramVisitor(NodeVisitor):
 
     def visit_number(self, node, child):
         _, number, _ = node
-        return int(number.text)
+        return number.text.strip()
 
     def visit_quote(self, node, child):
         return child
