@@ -1,6 +1,5 @@
 
 import re
-import string
 
 
 _WHITESPACE_REGEXP = re.compile('\s+')
@@ -15,8 +14,8 @@ def normalize(string, ignore=(), caseless=True, spaceless=True):
     if spaceless:
         string = _WHITESPACE_REGEXP.sub('', string)
     if caseless:
-        string = string.lower(string)
-        ignore = [string.lower(i) for i in ignore]
+        string = string.lower()
+        ignore = [i.lower() for i in ignore]
     for ign in ignore:
         if ign in string:  # performance optimization
             string = string.replace(ign, '')
