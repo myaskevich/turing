@@ -5,9 +5,11 @@ initial state does not end with zero
         assume ends with zero
 
     else
-        assume does not ends with zero
+        assume does not end with zero
 
     endif
+
+    do nothing
 
     move right
 }
@@ -22,6 +24,8 @@ final state ends with zero
         assume does not end with zero
 
     endif
+
+    do nothing
 
     move right
 }

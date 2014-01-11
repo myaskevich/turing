@@ -4,11 +4,21 @@ import sys
 import traceback
 
 from turing.runtime.machine import Turing
+from turing.tape import TapeError
 
 
 _state_registry = set(
     "Does not end with zero",
 )
+
+
+class State1(State):
+    def transition_to_(self):
+        pass
+
+
+class State2(State):
+    pass
 
 
 def main(args):
@@ -29,7 +39,12 @@ def main(args):
         turing.add_state(state)
 
     out_stream = sys.stdout
-    turing.start(out_stream)
+
+    try:
+        turing.start(out_stream)
+
+    except TapeError, e:
+        print "tape error:", str(e)
 
 
 if __name__ == '__main__':

@@ -1,65 +1,100 @@
+import unittest
 
-from turing.tape import Tape, NULL
+from nose.tools import raises
 
-
-def test_get():
-    tape = Tape("0101010110101")
-
-    tape         ; assert tape.get() == '0'
-    tape         ; assert tape.get() == '0'
-    tape.left()  ; assert tape.get() == NULL
-    tape.left()  ; assert tape.get() == NULL
-    tape.right() ; assert tape.get() == NULL
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.left()  ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == '0'
-    tape.right() ; assert tape.get() == '1'
-    tape.right() ; assert tape.get() == NULL
-    tape.right() ; assert tape.get() == NULL
-    tape.right() ; assert tape.get() == NULL
-    tape.left()  ; assert tape.get() == NULL
-    tape.left()  ; assert tape.get() == NULL
-    tape.left()  ; assert tape.get() == '1'
-    tape         ; assert tape.get() == '1'
-    tape         ; assert tape.get() == '1'
+from turing.tape import Tape, ExtendableTape, NULL, TapeError
 
 
-def test_put():
-    tape = Tape()
+class TapeTestCase(unittest.TestCase):
 
-    for j in range(10):
-        for i in range(10):
-            tape.put(str(i))
-            tape.right()
+    @raises(TapeError)
+    def test_get_fails_on_empty_tape(self):
+        tape = Tape('')
+        tape.get()
 
-        for k in range(9):
-            tape.left()
+    @raises(TapeError)
+    def test_get_fails_when_head_is_out_of_left_bound(self):
+        tape = Tape('123')
+        tape.get()
+        tape.left()
+        tape.get()
 
-    result = "0000000000123456789"
-    assert tape == result, "'" + tape + "' != '" + result + "'"
+    @raises(TapeError)
+    def test_get_fails_when_head_is_out_of_right_bound(self):
+        tape = Tape('123')
+        tape.get()
+        tape.right()
+        tape.get()
+        tape.right()
+        tape.get()
+        tape.right()
+
+    @raises(TapeError)
+    def test_put_fails_on_empty_tape(self):
+        tape = Tape('')
+        tape.put('a')
 
 
-    tape = Tape()
+class ExtandableTapeTestCase(unittest.TestCase):
 
-    for j in reversed(range(10)):
-        for i in reversed(range(10)):
-            tape.put(str(i))
-            tape.left()
+    def test_get(self):
+        tape = ExtendableTape("0101010110101")
 
-        for k in reversed(range(9)):
-            tape.right()
+        tape         ; assert tape.get() == '0'
+        tape         ; assert tape.get() == '0'
+        tape.left()  ; assert tape.get() == NULL
+        tape.left()  ; assert tape.get() == NULL
+        tape.right() ; assert tape.get() == NULL
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.left()  ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == '0'
+        tape.right() ; assert tape.get() == '1'
+        tape.right() ; assert tape.get() == NULL
+        tape.right() ; assert tape.get() == NULL
+        tape.right() ; assert tape.get() == NULL
+        tape.left()  ; assert tape.get() == NULL
+        tape.left()  ; assert tape.get() == NULL
+        tape.left()  ; assert tape.get() == '1'
+        tape         ; assert tape.get() == '1'
+        tape         ; assert tape.get() == '1'
 
-    result = "0123456789999999999"
 
-    assert tape == result, "'" + tape + "' != '" + result + "'"
+    def test_put(self):
+        tape = ExtendableTape()
+
+        for j in range(10):
+            for i in range(10):
+                tape.put(str(i))
+                tape.right()
+
+            for k in range(9):
+                tape.left()
+
+        result = "0000000000123456789"
+        assert tape == result, "'" + tape + "' != '" + result + "'"
+
+
+        tape = ExtendableTape()
+
+        for j in reversed(range(10)):
+            for i in reversed(range(10)):
+                tape.put(str(i))
+                tape.left()
+
+            for k in reversed(range(9)):
+                tape.right()
+
+        result = "0123456789999999999"
+
+        assert tape == result, "'" + tape + "' != '" + result + "'"

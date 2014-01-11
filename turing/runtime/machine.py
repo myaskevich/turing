@@ -1,19 +1,25 @@
 
 from turing.const import Direction, Action
+from turing.tape import TapeIsOverException
 
 
 class Turing(object):
-    def __init__(self, tape):
+    def __init__(self, tape, init_state):
         self._tape = tape
-        self._state = state
+        self._state = init_state
+
+    @property
+    def head(self):
+        return self._tape.get()
 
     def move(self, direction):
-        if direction == Direction.LEFT:
-            self._tape.left()
-            print self._tape.get()
+        # if direction == Direction.LEFT:
+        #     self._tape.left()
+        #     print self._tape.get()
 
-        elif direction == Direction.RIGHT:
+        if direction == Direction.RIGHT:
             self._tape.right()
+
             print self._tape.get()
 
         elif direction == Direction.NONE:
@@ -40,3 +46,9 @@ class Turing(object):
 
     def assume(self, state):
         self._state = state
+
+    def start(self, out_stream):
+        try:
+            self._state.resolve(self)
+        except TapeIsOverException:
+            # Just terminate
