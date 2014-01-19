@@ -1,37 +1,20 @@
 
+class BaseState(object):
+    def exec(self, machine):
+        self._initialize(machine)
+        self._resolve(machine)
+        self._finalize(machine)
 
-class State(object):
-    def resolve(self, machine):
-        raise NotImplementedError
+
+class InitialMixin(object):
+    def is_initial(self):
+        return True
 
 
-class InitialState(object):
+class FinalMixin(object):
+    def is_final(self):
+        return True
+
+
+class UserState(BaseState):
     pass
-
-
-class FinalState(object):
-    pass
-
-
-class DoesNotEndWithZero_State(InitialState):
-    def resolve(self, machine):
-        if machine.head == '0':
-            machine.assume(get_state("ends_with_zero"))
-
-        else:
-            machine.assume(get_state("does_not_end_with_zero"))
-
-        machine.move(Direction.RIGHT)
-
-
-class EndsWithZero_State(FinalState):
-    def resolve(self, machine):
-        if machine.head == '0':
-            machine.assume(get_state("ends_with_zero"))
-
-        else:
-            machine.assume(get_state("does_not_end_with_zero"))
-
-        machine.do(Action.NONE)
-
-        machine.move(Direction.RIGHT)

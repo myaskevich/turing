@@ -3,6 +3,7 @@ import os
 import sys
 import traceback
 
+from turing.runtime.state import UserState, InitialMixin, FinalMixin
 from turing.runtime.machine import Turing
 from turing.tape import TapeError
 
@@ -12,13 +13,30 @@ _state_registry = set(
 )
 
 
-class State1(State):
-    def transition_to_(self):
-        pass
+class DoesNotEndWithZero_State(UserState, InitialMixin):
+    def _resolve(self):
+        if self.machine.head == '0':
+            self.machine.assume('ends_with_zero')
+
+        else:
+            self.machine.assume('does_not_end_with_zero')
+
+        self.machine.do(Action.NONE)
+
+        self.machine.move(Direction.RIGHT)
 
 
-class State2(State):
-    pass
+class EndsWithZero_State(UserState, FinalMixin):
+    def _resolve(self):
+        if self.machine.head == '0':
+            self.machine.assume('ends_with_zero')
+
+        else:
+            self.machine.assume('does_not_end_with_zero')
+
+        self.machine.do(Action.NONE)
+
+        self.machine.move(Direction.RIGHT)
 
 
 def main(args):

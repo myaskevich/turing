@@ -49,6 +49,15 @@ class Turing(object):
 
     def start(self, out_stream):
         try:
-            self._state.resolve(self)
+            self._state.exec(self)
         except TapeIsOverException:
             # Just terminate
+
+        is_final = None
+        try:
+            is_final = state.is_final()
+        except AttributeError:
+            is_final = False
+
+        if is_final:
+            raise Terminate
