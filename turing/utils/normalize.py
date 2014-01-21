@@ -27,3 +27,8 @@ def make_normalizer(**options):
         return normalize(string, **options)
 
     return concrete_normalizer
+
+
+def get_state_name_norm():
+    return make_normalizer(ignore=('_', '-', '.', ',', ':', ';'))
+

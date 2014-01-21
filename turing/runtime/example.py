@@ -3,46 +3,63 @@ import os
 import sys
 import traceback
 
-from turing.runtime.state import UserState, InitialMixin, FinalMixin
-from turing.runtime.machine import Turing
+from turing.runtime.state import UserState, InitialMixin, FinalMixin, \
+    StateTable
+from turing.runtime.machine import Turing, TerminateException
 from turing.tape import TapeError
+from turing.const import Move, Action
 
 
-_state_registry = set(
-    "Does not end with zero",
-)
+_states = set()
 
 
-class DoesNotEndWithZero_State(UserState, InitialMixin):
-    def _resolve(self):
-        if self.machine.head == '0':
-            self.machine.assume('ends_with_zero')
+class DoesNotEndWithZero_State(UserState, InitialMixin, FinalMixin):
+    name = "does not end with zero"
+
+    def _resolve(self, machine):
+        if machine.head == '0' :
+            machine.assume('endswithzero')
 
         else:
-            self.machine.assume('does_not_end_with_zero')
+            machine.assume('doesnotendwithzero')
 
-        self.machine.do(Action.NONE)
+        machine.do(Action.NONE)
 
-        self.machine.move(Direction.RIGHT)
+        machine.move(Move.RIGHT)
+
+_states.add(DoesNotEndWithZero_State())
 
 
 class EndsWithZero_State(UserState, FinalMixin):
-    def _resolve(self):
-        if self.machine.head == '0':
-            self.machine.assume('ends_with_zero')
+    name = "ends with zero"
+
+    def _resolve(self, machine):
+        if machine.head == '0':
+            machine.assume('endswithzero')
 
         else:
-            self.machine.assume('does_not_end_with_zero')
+            machine.assume('doesnotendwithzero')
 
-        self.machine.do(Action.NONE)
+        machine.do(Action.WRITE, 'x')
 
-        self.machine.move(Direction.RIGHT)
+        machine.move(Move.RIGHT)
+
+_states.add(EndsWithZero_State())
+
+
+def make_state_table():
+    table = StateTable()
+
+    for state in _states:
+        table.add_state(state)
+
+    return table
 
 
 def main(args):
     msg = "Expected single command line argument, got " + str(len(args))
-    assert len(args) == 1, msg
-    arg = args[0]
+    assert len(args) == 2, msg
+    arg = args[1]
 
     if os.path.isfile(arg):
         src = ""
@@ -52,17 +69,27 @@ def main(args):
         src = arg
 
     turing = Turing(src)
+    sys.stderr.write("-> " + str(turing._tape) + "\n")
 
-    for state in _state_registry:
-        turing.add_state(state)
+    state_table = make_state_table()
+    state_table.set_current(state_table.get_initial().getid())
 
-    out_stream = sys.stdout
+    turing.set_states(state_table)
 
     try:
-        turing.start(out_stream)
+        turing.start()
 
     except TapeError, e:
         print "tape error:", str(e)
+
+    except TerminateException:
+        print "terminated"
+
+    finally:
+        out_tape = str(turing._tape)
+        sys.stderr.write("<- " + out_tape + "\n")
+
+    return out_tape
 
 
 if __name__ == '__main__':

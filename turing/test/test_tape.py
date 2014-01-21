@@ -2,7 +2,8 @@ import unittest
 
 from nose.tools import raises
 
-from turing.tape import Tape, ExtendableTape, NULL, TapeError
+from turing.tape import Tape, NullableTape, ExtendableTape, \
+    EXPAND_CHAR, NULL, TapeError
 
 
 class TapeTestCase(unittest.TestCase):
@@ -35,6 +36,11 @@ class TapeTestCase(unittest.TestCase):
         tape.put('a')
 
 
+class NullableTapeTestCase(unittest.TestCase):
+    def test_get_on_empty_tape(self):
+        assert NULL == NullableTape('').get()
+
+
 class ExtandableTapeTestCase(unittest.TestCase):
 
     def test_get(self):
@@ -42,9 +48,9 @@ class ExtandableTapeTestCase(unittest.TestCase):
 
         tape         ; assert tape.get() == '0'
         tape         ; assert tape.get() == '0'
-        tape.left()  ; assert tape.get() == NULL
-        tape.left()  ; assert tape.get() == NULL
-        tape.right() ; assert tape.get() == NULL
+        tape.left()  ; assert tape.get() == EXPAND_CHAR
+        tape.left()  ; assert tape.get() == EXPAND_CHAR
+        tape.right() ; assert tape.get() == EXPAND_CHAR
         tape.right() ; assert tape.get() == '0'
         tape.right() ; assert tape.get() == '1'
         tape.right() ; assert tape.get() == '0'
@@ -60,11 +66,11 @@ class ExtandableTapeTestCase(unittest.TestCase):
         tape.right() ; assert tape.get() == '1'
         tape.right() ; assert tape.get() == '0'
         tape.right() ; assert tape.get() == '1'
-        tape.right() ; assert tape.get() == NULL
-        tape.right() ; assert tape.get() == NULL
-        tape.right() ; assert tape.get() == NULL
-        tape.left()  ; assert tape.get() == NULL
-        tape.left()  ; assert tape.get() == NULL
+        tape.right() ; assert tape.get() == EXPAND_CHAR
+        tape.right() ; assert tape.get() == EXPAND_CHAR
+        tape.right() ; assert tape.get() == EXPAND_CHAR
+        tape.left()  ; assert tape.get() == EXPAND_CHAR
+        tape.left()  ; assert tape.get() == EXPAND_CHAR
         tape.left()  ; assert tape.get() == '1'
         tape         ; assert tape.get() == '1'
         tape         ; assert tape.get() == '1'

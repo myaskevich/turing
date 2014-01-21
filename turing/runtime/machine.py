@@ -1,29 +1,43 @@
 
-from turing.const import Direction, Action
-from turing.tape import TapeIsOverException
+import sys
+
+from turing.const import Move, Action
+from turing.tape import TapeIsOverException, NullableTape, Tape
+
+
+class TerminateException(Exception):
+    pass
+
+
+MAX_STATE_LOOP = 1000000L
 
 
 class Turing(object):
-    def __init__(self, tape, init_state):
-        self._tape = tape
-        self._state = init_state
+    def __init__(self, src, out=sys.stdout):
+        if isinstance(src, Tape):
+            self._tape = src
+        else:
+            self._tape = NullableTape(src)
+        self._states = None
+        self._outstream = out
+
+    def set_states(self, table):
+        self._states = table
 
     @property
     def head(self):
         return self._tape.get()
 
     def move(self, direction):
-        # if direction == Direction.LEFT:
+        # if direction == Move.LEFT:
         #     self._tape.left()
         #     print self._tape.get()
 
-        if direction == Direction.RIGHT:
+        if direction == Move.RIGHT:
             self._tape.right()
 
-            print self._tape.get()
-
-        elif direction == Direction.NONE:
-            print self._tape.get()
+        elif direction == Move.NONE:
+            pass
 
         else:
             assert 0   # sanity check
@@ -32,32 +46,30 @@ class Turing(object):
         if action == Action.WRITE:
             assert len(args) == 1
             self._tape.put(args[0])
-            print 'put', args[0]
 
         elif action == Action.ERASE:
             self._tape.put(NULL)
-            print 'erase'
 
         elif action == Action.NONE:
-            print 'do nothing'
+            pass
 
         else:
             assert 0  # sanity check
 
-    def assume(self, state):
-        self._state = state
+    def assume(self, state_name):
+        self._states.set_current(state_name)
 
-    def start(self, out_stream):
-        try:
-            self._state.exec(self)
-        except TapeIsOverException:
-            # Just terminate
+    def start(self):
+        watch_state = None
+        watch_state_iter = 0
 
-        is_final = None
-        try:
-            is_final = state.is_final()
-        except AttributeError:
-            is_final = False
+        while True:
+            current = self._states.current
+            current.execute(self)
 
-        if is_final:
-            raise Terminate
+            if current == watch_state:
+                assert watch_state_iter < MAX_STATE_LOOP, "MAX_STATE_LOOP exceeded"
+                watch_state_iter += 1
+            else:
+                watch_state = current
+                watch_state_iter = 0

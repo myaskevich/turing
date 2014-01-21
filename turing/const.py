@@ -1,5 +1,5 @@
 
-class Direction:
+class Move:
     NONE = 0
     RIGHT = 1
     LEFT = 2

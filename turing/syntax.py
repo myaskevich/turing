@@ -4,10 +4,10 @@ import sys
 from parsimonious import Grammar
 from parsimonious.nodes import NodeVisitor
 
-from turing.utils.normalize import make_normalizer
+from turing.utils.normalize import get_state_name_norm
 
 
-norm_state = make_normalizer(ignore=('_', '-', '.', ',', ':', ';'))
+norm_state = get_state_name_norm()
 
 
 rules = """\
@@ -44,7 +44,7 @@ class TuringSyntaxVisitor(NodeVisitor):
         pass
 
     def visit_program(self, node, child):
-        sys.stderr.write(str(node) + "\n")
+        # sys.stderr.write(str(node) + "\n")
         return child
 
 
