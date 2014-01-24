@@ -12,15 +12,8 @@ from turing.const import Move, Action
 
 
 _states = set()
-{% for state in context.states %}
-
-class {{ state.class_name }}({{ state.modifiers }}):
-    name = "{{ state.name }}"
-
-    def _resolve(self, machine):
-        {{ state.code|indent }}
-
-_states.add({{ state.class_name }}())
+{% for state in states %}
+{{ state }}
 {% endfor %}
 
 def make_state_table():

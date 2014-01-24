@@ -28,8 +28,8 @@ def assert_turingc_fails(*args):
     assert False
 
 
-def test_file_argument():
-    assert_turingc_fails()
+# def test_file_argument():
+#     assert_turingc_fails()
 
 
 def test_examples():

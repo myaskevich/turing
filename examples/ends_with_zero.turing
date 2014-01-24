@@ -3,6 +3,9 @@ initial state does not end with zero
 {
     if head is 0 then
         assume ends with zero
+    
+    else if head is 7 then
+        assume does not end with zero
 
     else
         assume does not end with zero
@@ -14,10 +17,9 @@ initial state does not end with zero
     move right
 }
 
-
-state JUST TO CHECK state1123 modifiers
+state JUST TO CHECK state123 modifiers
 {
-    pass
+    no move
 }
 
 

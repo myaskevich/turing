@@ -7,7 +7,6 @@ from os.path import join, dirname, isfile
 from jinja2 import Template
 from parsimonious.exceptions import ParseError
 
-from turing.compiler.context import TuringContext
 from turing.syntax import parse
 
 
@@ -71,10 +70,8 @@ def main(argv=sys.argv):
 
         fail("syntax error: invalid syntax at line %d, column %d" % (line, column))
 
-    context = TuringContext(node)
     template_str = open(TEMPLATE_PATH, 'rb').read()
-
-    Template(template_str).stream(context=context).dump(options.output)
+    Template(template_str).stream(states=node).dump(options.output)
 
 
 if __name__ == '__main__':
