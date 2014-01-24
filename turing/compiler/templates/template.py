@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python
 
 import os
 import sys
@@ -12,53 +12,16 @@ from turing.const import Move, Action
 
 
 _states = set()
-
-
-# class DoesNotEndWithZero_State(UserState, InitialMixin):
-#     name = "does not end with zero"
-# 
-#     def _resolve(self, machine):
-#         if machine.head == '0' :
-#             machine.assume('endswithzero')
-#             machine.do(Action.WRITE, 'x')
-# 
-#         else:
-#             machine.assume(self)
-#             machine.terminate()
-# 
-#         machine.move(Move.RIGHT)
-# 
-# _states.add(DoesNotEndWithZero_State())
-# 
-# 
-# class EndsWithZero_State(UserState, FinalMixin):
-#     name = "ends with zero"
-# 
-#     def _resolve(self, machine):
-#         if machine.head == '0' :
-#             machine.assume(self)
-#             machine.do(Action.WRITE, 'x')
-# 
-#         else:
-#             machine.assume('doesnotendwithzero')
-#             machine.terminate()
-# 
-#         machine.move(Move.RIGHT)
-# 
-# _states.add(EndsWithZero_State())
-
 {% for state in context.states %}
 
 class {{ state.class_name }}({{ state.modifiers }}):
     name = "{{ state.name }}"
 
     def _resolve(self, machine):
-        {{ state.code }}
+        {{ state.code|indent }}
 
 _states.add({{ state.class_name }}())
-
 {% endfor %}
-
 
 def make_state_table():
     table = StateRegister()

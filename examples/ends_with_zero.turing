@@ -9,9 +9,15 @@ initial state does not end with zero
 
     endif
 
-    do nothing
+        do nothing
 
     move right
+}
+
+
+state JUST TO CHECK state1123 modifiers
+{
+    pass
 }
 
 
@@ -27,5 +33,5 @@ final state ends with zero
 
     do nothing
 
-    move right
+        move right
 }

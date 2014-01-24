@@ -31,4 +31,3 @@ def make_normalizer(**options):
 
 def get_state_name_norm():
     return make_normalizer(ignore=('_', '-', '.', ',', ':', ';'))
-

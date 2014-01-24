@@ -89,7 +89,7 @@ class TuringSyntaxVisitor(NodeVisitor):
 
     def visit_write(self, node, child):
         _, _, _, what_node, _ = node
-        what = self.machine.eval(what_node)
+        assert 0
         return node
 
     def visit_erase(self, node, child):
