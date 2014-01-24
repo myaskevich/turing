@@ -2,7 +2,8 @@
 import sys
 
 from turing.const import Move, Action
-from turing.tape import TapeIsOverException, NullableTape, Tape
+from turing.tape import TapeIsOverException, NullableTape, Tape, \
+    NULL, BLANK
 
 
 class TerminateException(Exception):
@@ -29,18 +30,20 @@ class Turing(object):
         return self._tape.get()
 
     def move(self, direction):
-        # if direction == Move.LEFT:
-        #     self._tape.left()
-        #     print self._tape.get()
+        try:
+            if direction == Move.LEFT:
+                self._tape.left()
 
-        if direction == Move.RIGHT:
-            self._tape.right()
+            if direction == Move.RIGHT:
+                self._tape.right()
 
-        elif direction == Move.NONE:
-            pass
+            elif direction == Move.NONE:
+                pass
 
-        else:
-            assert 0   # sanity check
+            else:
+                assert 0   # sanity check
+        except TapeIsOverException:
+            raise TapeIsOverException("Tape went over at '%s' state" % str(self._states.current))
 
     def do(self, action, *args):
         if action == Action.WRITE:
@@ -48,7 +51,7 @@ class Turing(object):
             self._tape.put(args[0])
 
         elif action == Action.ERASE:
-            self._tape.put(NULL)
+            self._tape.put(BLANK)
 
         elif action == Action.NONE:
             pass
@@ -73,3 +76,6 @@ class Turing(object):
             else:
                 watch_state = current
                 watch_state_iter = 0
+
+    def terminate(self):
+        raise TerminateException("Machine terminated at '%s' state" % str(self._states.current))

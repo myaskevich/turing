@@ -6,24 +6,23 @@ import traceback
 from turing.runtime.state import UserState, InitialMixin, FinalMixin, \
     StateTable
 from turing.runtime.machine import Turing, TerminateException
-from turing.tape import TapeError
+from turing.tape import TapeError, TapeIsOverException
 from turing.const import Move, Action
 
 
 _states = set()
 
 
-class DoesNotEndWithZero_State(UserState, InitialMixin, FinalMixin):
+class DoesNotEndWithZero_State(UserState, InitialMixin):
     name = "does not end with zero"
 
     def _resolve(self, machine):
         if machine.head == '0' :
             machine.assume('endswithzero')
+            machine.do(Action.WRITE, 'x')
 
         else:
             machine.assume('doesnotendwithzero')
-
-        machine.do(Action.NONE)
 
         machine.move(Move.RIGHT)
 
@@ -34,13 +33,12 @@ class EndsWithZero_State(UserState, FinalMixin):
     name = "ends with zero"
 
     def _resolve(self, machine):
-        if machine.head == '0':
+        if machine.head == '0' :
             machine.assume('endswithzero')
+            machine.do(Action.WRITE, 'x')
 
         else:
             machine.assume('doesnotendwithzero')
-
-        machine.do(Action.WRITE, 'x')
 
         machine.move(Move.RIGHT)
 
@@ -79,11 +77,18 @@ def main(args):
     try:
         turing.start()
 
+    except TapeIsOverException, e:
+        # print e
+        if turing._states.current == turing._states.get_final():
+            print 'terminated at', turing._states.current
+        else:
+            print "didn't terminate at", turing._states.current
+
     except TapeError, e:
         print "tape error:", str(e)
 
-    except TerminateException:
-        print "terminated"
+    except TerminateException, e:
+        pass
 
     finally:
         out_tape = str(turing._tape)

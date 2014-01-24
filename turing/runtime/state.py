@@ -26,6 +26,9 @@ class BaseState(object):
     def getid(self):
         return norm(self.name)
 
+    def __str__(self):
+        return self.name
+
 
 class InitialMixin(object):
     def is_initial(self):

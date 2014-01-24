@@ -1,5 +1,6 @@
 
 NULL = ''
+BLANK = ' '
 EXPAND_CHAR = '.'
 
 
