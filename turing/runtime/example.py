@@ -4,16 +4,16 @@ import sys
 import traceback
 
 from turing.runtime.state import UserState, InitialMixin, FinalMixin, \
-    StateTable
+    StateRegister
 from turing.runtime.machine import Turing, TerminateException
-from turing.tape import TapeError, TapeIsOverException
+from turing.tape import TapeError, TapeIsOverException, Tape
 from turing.const import Move, Action
 
 
 _states = set()
 
 
-class DoesNotEndWithZero_State(UserState, InitialMixin):
+class DoesNotEndWithZero_State(UserState, InitialMixin, FinalMixin):
     name = "does not end with zero"
 
     def _resolve(self, machine):
@@ -22,7 +22,7 @@ class DoesNotEndWithZero_State(UserState, InitialMixin):
             machine.do(Action.WRITE, 'x')
 
         else:
-            machine.assume('doesnotendwithzero')
+            machine.assume(self)
 
         machine.move(Move.RIGHT)
 
@@ -34,7 +34,7 @@ class EndsWithZero_State(UserState, FinalMixin):
 
     def _resolve(self, machine):
         if machine.head == '0' :
-            machine.assume('endswithzero')
+            machine.assume(self)
             machine.do(Action.WRITE, 'x')
 
         else:
@@ -46,7 +46,7 @@ _states.add(EndsWithZero_State())
 
 
 def make_state_table():
-    table = StateTable()
+    table = StateRegister()
 
     for state in _states:
         table.add_state(state)
@@ -59,7 +59,9 @@ def main(args):
     assert len(args) == 2, msg
     arg = args[1]
 
-    if os.path.isfile(arg):
+    if isinstance(arg, Tape):
+        src = arg
+    elif os.path.isfile(arg):
         src = ""
         with open(arg, 'rb') as file:
             src = file.read()
@@ -69,23 +71,29 @@ def main(args):
     turing = Turing(src)
     sys.stderr.write("-> " + str(turing._tape) + "\n")
 
-    state_table = make_state_table()
-    state_table.set_current(state_table.get_initial().getid())
+    state_register = make_state_table()
+    initial = state_register.get_initial()
+    finals = state_register.get_finals()
 
-    turing.set_states(state_table)
+    turing.set_state_register(state_register)
+    state_register.set_current(initial.getid())
+
+    ret = 0
 
     try:
         turing.start()
 
     except TapeIsOverException, e:
         # print e
-        if turing._states.current == turing._states.get_final():
-            print 'terminated at', turing._states.current
+        if turing._register.current in finals:
+            sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
         else:
-            print "didn't terminate at", turing._states.current
+            sys.stderr.write("didn't terminate at either " + str(finals) + ". got " + str(turing._register.current) + "\n")
+            ret = 1
 
     except TapeError, e:
         print "tape error:", str(e)
+        ret = 2
 
     except TerminateException, e:
         pass
@@ -94,13 +102,12 @@ def main(args):
         out_tape = str(turing._tape)
         sys.stderr.write("<- " + out_tape + "\n")
 
-    return out_tape
+    return ret
 
 
 if __name__ == '__main__':
     try:
-        main(sys.args)
-        sys.exit(0)
+        sys.exit(main(sys.args))
     except Exception:
         traceback.print_exc()
         sys.exit(1)

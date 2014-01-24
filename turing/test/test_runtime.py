@@ -1,5 +1,6 @@
 
 from turing.runtime.example import main
+from turing.tape import NullableTape
 
 
 def turing(src):
@@ -7,7 +8,11 @@ def turing(src):
 
 
 def assert_turing(src, expected):
-    out = turing(src)
+    tape = NullableTape(src)
+    ret = turing(tape)
+    out = str(tape)
+
+    assert ret == 0, "machine didn't terminate"
     assert out == expected, src + " -/> " + expected + ", got " + out
 
 

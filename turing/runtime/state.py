@@ -44,13 +44,13 @@ class UserState(BaseState):
     pass
 
 
-class StateTable(object):
+class StateRegister(object):
     def __init__(self):
         self._current = None
-        self._table = {}
+        self._register = {}
 
     def get_initial(self):
-        for state in self._table.values():
+        for state in self._register.values():
             try:
                 if state.is_initial():
                     return state
@@ -58,27 +58,33 @@ class StateTable(object):
                 pass
         return None
 
-    def get_final(self):
-        for state in self._table.values():
+    def get_finals(self):
+        finals = []
+
+        for state in self._register.values():
             try:
                 if state.is_final():
-                    return state
+                    finals.append(state)
             except AttributeError:
                 pass
-        return None
+
+        return tuple(finals)
 
     @property
     def current(self):
         return self._current
 
-    def set_current(self, state_name):
-        self._current = self._table[state_name]
+    def set_current(self, state):
+        if isinstance(state, BaseState):
+            self._current = self._register[state.getid()]
+        else:
+            self._current = self._register[state]
 
     def add_state(self, state):
-        self._table[state.getid()] = state
+        self._register[state.getid()] = state
 
     def get_state(self, name):
-        return self._table[state.getid()]
+        return self._register[state.getid()]
 
     def __str__(self):
-        return str(self._table)
+        return str(self._register)

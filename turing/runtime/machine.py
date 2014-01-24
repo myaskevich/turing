@@ -19,11 +19,11 @@ class Turing(object):
             self._tape = src
         else:
             self._tape = NullableTape(src)
-        self._states = None
+        self._register = None
         self._outstream = out
 
-    def set_states(self, table):
-        self._states = table
+    def set_state_register(self, table):
+        self._register = table
 
     @property
     def head(self):
@@ -43,7 +43,7 @@ class Turing(object):
             else:
                 assert 0   # sanity check
         except TapeIsOverException:
-            raise TapeIsOverException("Tape went over at '%s' state" % str(self._states.current))
+            raise TapeIsOverException("Tape went over at '%s' state" % str(self._register.current))
 
     def do(self, action, *args):
         if action == Action.WRITE:
@@ -59,15 +59,15 @@ class Turing(object):
         else:
             assert 0  # sanity check
 
-    def assume(self, state_name):
-        self._states.set_current(state_name)
+    def assume(self, state):
+        self._register.set_current(state)
 
     def start(self):
         watch_state = None
         watch_state_iter = 0
 
         while True:
-            current = self._states.current
+            current = self._register.current
             current.execute(self)
 
             if current == watch_state:
@@ -78,4 +78,4 @@ class Turing(object):
                 watch_state_iter = 0
 
     def terminate(self):
-        raise TerminateException("Machine terminated at '%s' state" % str(self._states.current))
+        raise TerminateException("Machine terminated at '%s' state" % str(self._register.current))
