@@ -2,7 +2,8 @@
 import sys
 
 from parsimonious import Grammar
-from parsimonious.nodes import NodeVisitor
+from parsimonious.exceptions import ParseError
+from parsimonious.nodes import NodeVisitor, VisitationError
 
 from turing.utils.normalize import get_state_name_norm
 
@@ -42,9 +43,9 @@ rules = """\
 class TuringSyntaxVisitor(NodeVisitor):
     def generic_visit(self, node, child):
         pass
+        # raise ParseError(node.text, pos=node.start)
 
     def visit_program(self, node, child):
-        # sys.stderr.write(str(node) + "\n")
         return child
 
 

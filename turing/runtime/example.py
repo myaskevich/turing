@@ -71,7 +71,6 @@ def main(args):
         src = arg
 
     turing = Turing(src)
-    sys.stderr.write("-> " + str(turing._tape) + "\n")
 
     state_register = make_state_table()
     initial = state_register.get_initial()
@@ -87,10 +86,7 @@ def main(args):
 
     except TapeIsOverException, e:
         # print e
-        if turing._register.current in finals:
-            sys.stderr.write("terminated at '" + str(turing._register.current) + "'\n")
-        else:
-            sys.stderr.write("didn't terminate at either " + str(finals) + ". got " + str(turing._register.current) + "\n")
+        if turing._register.current not in finals:
             ret = 1
 
     except TapeError, e:
@@ -98,15 +94,11 @@ def main(args):
         ret = 2
 
     except TerminateException, e:
-        if turing._register.current in finals:
-            sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
-        else:
-            sys.stderr.write("didn't terminate at either " + str(finals) + ". got '" + str(turing._register.current) + "'\n")
+        if turing._register.current not in finals:
             ret = 1
 
     finally:
         out_tape = str(turing._tape)
-        sys.stderr.write("<- " + out_tape + "\n")
 
     return ret
 
