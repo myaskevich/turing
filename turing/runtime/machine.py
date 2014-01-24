@@ -14,13 +14,12 @@ MAX_STATE_LOOP = 1000000L
 
 
 class Turing(object):
-    def __init__(self, src, out=sys.stdout):
+    def __init__(self, src):
         if isinstance(src, Tape):
             self._tape = src
         else:
             self._tape = NullableTape(src)
         self._register = None
-        self._outstream = out
 
     def set_state_register(self, table):
         self._register = table

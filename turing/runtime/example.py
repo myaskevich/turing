@@ -13,7 +13,7 @@ from turing.const import Move, Action
 _states = set()
 
 
-class DoesNotEndWithZero_State(UserState, InitialMixin, FinalMixin):
+class DoesNotEndWithZero_State(UserState, InitialMixin):
     name = "does not end with zero"
 
     def _resolve(self, machine):
@@ -23,6 +23,7 @@ class DoesNotEndWithZero_State(UserState, InitialMixin, FinalMixin):
 
         else:
             machine.assume(self)
+            machine.terminate()
 
         machine.move(Move.RIGHT)
 
@@ -39,6 +40,7 @@ class EndsWithZero_State(UserState, FinalMixin):
 
         else:
             machine.assume('doesnotendwithzero')
+            machine.terminate()
 
         machine.move(Move.RIGHT)
 
@@ -86,7 +88,7 @@ def main(args):
     except TapeIsOverException, e:
         # print e
         if turing._register.current in finals:
-            sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
+            sys.stderr.write("terminated at '" + str(turing._register.current) + "'\n")
         else:
             sys.stderr.write("didn't terminate at either " + str(finals) + ". got " + str(turing._register.current) + "\n")
             ret = 1
@@ -96,7 +98,11 @@ def main(args):
         ret = 2
 
     except TerminateException, e:
-        pass
+        if turing._register.current in finals:
+            sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
+        else:
+            sys.stderr.write("didn't terminate at either " + str(finals) + ". got '" + str(turing._register.current) + "'\n")
+            ret = 1
 
     finally:
         out_tape = str(turing._tape)

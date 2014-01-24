@@ -7,7 +7,7 @@ def turing(src):
     return main(['main.py', src])
 
 
-def assert_turing(src, expected):
+def assert_turing_ok(src, expected):
     tape = NullableTape(src)
     ret = turing(tape)
     out = str(tape)
@@ -16,7 +16,16 @@ def assert_turing(src, expected):
     assert out == expected, src + " -/> " + expected + ", got " + out
 
 
+def assert_turing_ko(src, expected):
+    tape = NullableTape(src)
+    ret = turing(tape)
+    out = str(tape)
+
+    assert ret == 1, "machine terminate when it shouldn't have"
+    assert out == expected, src + " -/> " + expected + ", got " + out
+
+
 def test_runtime():
-    assert_turing('', '')
-    assert_turing('00000000000000', 'xxxxxxxxxxxxxx')
-    assert_turing('00010111011011', 'xxx1x111x11x11')
+    assert_turing_ko('', '')
+    assert_turing_ok('00000000000000', 'xxxxxxxxxxxxxx')
+    assert_turing_ko('00010111011011', 'xxx10111011011')
