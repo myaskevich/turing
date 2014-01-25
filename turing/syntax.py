@@ -1,6 +1,4 @@
 
-import sys
-
 from parsimonious import Grammar
 from parsimonious.exceptions import ParseError
 from parsimonious.nodes import NodeVisitor, VisitationError
@@ -95,8 +93,6 @@ class TuringSyntaxVisitor(NodeVisitor):
 
     @indent(level=2)
     def visit_state_code(self, node, child):
-        # import pdb;pdb.set_trace()
-        # sys.stderr.write(str(child) + "\n")
         return "\n".join(child)
 
     def visit_state_name(self, node, child):

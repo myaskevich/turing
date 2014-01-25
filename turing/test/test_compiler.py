@@ -1,6 +1,4 @@
 
-import traceback
-
 from turing.compiler.main import main
 
 

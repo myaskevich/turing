@@ -1,6 +1,4 @@
 
-import sys
-
 from turing.const import Move, Action
 from turing.tape import TapeIsOverException, NullableTape, Tape, \
     NULL, BLANK

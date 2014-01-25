@@ -14,7 +14,7 @@ TEMPLATE_PATH = join(dirname(__file__), 'templates', 'template.py')
 
 
 def make_parser():
-    usage = ""
+    usage = "Usage: turingc FILE [OPTIONS]"
     parser = optparse.OptionParser(usage=usage)
 
     parser.add_option("-o",

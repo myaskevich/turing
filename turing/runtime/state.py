@@ -1,6 +1,4 @@
 
-import sys
-
 from turing.utils.normalize import get_state_name_norm
 
 norm = get_state_name_norm()

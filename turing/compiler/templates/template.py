@@ -48,7 +48,7 @@ def main(args):
     turing.set_state_register(state_register)
     state_register.set_current(initial.getid())
 
-    ret = 0
+    EXIT = 0
 
     try:
         turing.start()
@@ -59,23 +59,23 @@ def main(args):
             sys.stderr.write("terminated at '" + str(turing._register.current) + "'\n")
         else:
             sys.stderr.write("didn't terminate at either " + str(finals) + ". got " + str(turing._register.current) + "\n")
-            ret = 1
+            EXIT = 1
 
     except TapeError, e:
         print "tape error:", str(e)
-        ret = 2
+        EXIT = 2
 
     except TerminateException, e:
         if turing._register.current in finals:
             sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
         else:
             sys.stderr.write("didn't terminate at either " + str(finals) + ". got '" + str(turing._register.current) + "'\n")
-            ret = 1
+            EXIT = 1
 
     finally:
         out_tape = str(turing._tape)
 
-    return ret
+    return EXIT
 
 
 if __name__ == '__main__':
