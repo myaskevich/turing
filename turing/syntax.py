@@ -52,8 +52,23 @@ rules = """
     else_branch = _ "else" _ state_code _
     if_block = _ if_branch _ elif_branches _ else_branch? _ "endif" _
 
-    statement = movement / action / assume / if_block / _
+    statement = movement / action / assume / if_block
 """
+
+
+def indent(level=0):
+    def wrapper(visit_to_wrap):
+        def indent_visit(self, *args):
+            text = visit_to_wrap(self, *args)
+            indent_text = ""
+            for line in text.split("\n"):
+                indent_text += (' ' * 4 * level) + line + "\n"
+
+            return indent_text[:-1]
+
+        return indent_visit
+
+    return wrapper
 
 
 class TuringSyntaxVisitor(NodeVisitor):
@@ -78,9 +93,10 @@ class TuringSyntaxVisitor(NodeVisitor):
 
         return ", ".join(modifiers)
 
+    @indent(level=2)
     def visit_state_code(self, node, child):
         # import pdb;pdb.set_trace()
-        sys.stderr.write(str(child) + "\n")
+        # sys.stderr.write(str(child) + "\n")
         return "\n".join(child)
 
     def visit_state_name(self, node, child):
@@ -96,7 +112,7 @@ class %(class_name)s(%(modifiers)s):
     name = '%(name)s'
 
     def _resolve(self, machine):
-        %(code)s
+%(code)s
 
 _states.add(%(class_name)s()) """ % {
         'class_name': class_name,
@@ -136,7 +152,7 @@ _states.add(%(class_name)s()) """ % {
             there = "Move.RIGHT"
 
         else:
-            raise ParseError
+            assert 0
 
         return move % there
 
@@ -187,14 +203,14 @@ _states.add(%(class_name)s()) """ % {
 
         return """\
 if %(condition)s:
-    %(code)s""" % {'condition': condition, 'code': code}
+%(code)s""" % {'condition': condition, 'code': code}
 
     def visit_elif_branch(self, node, child):
         _, _, _, _, _, condition, _, _, _, code, _ = child
 
         return """
 elif %(condition)s:
-    %(code)s""" % {'condition': condition, 'code': code}
+%(code)s""" % {'condition': condition, 'code': code}
 
     def visit_elif_branches(self, node, child):
         return ''.join(child)
@@ -204,7 +220,7 @@ elif %(condition)s:
 
         return """
 else:
-    %(code)s""" % {'code': code}
+%(code)s""" % {'code': code}
 
     def visit_if_block(self, node, child):
         _, if_branch, _, elif_branches, _, else_branch, _, _, _ = child

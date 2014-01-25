@@ -2,7 +2,16 @@
 initial state does not end with zero
 {
     if head is 0 then
-        assume ends with zero
+        if head is 0 then
+            assume ends with zero
+
+        else if head is 1 then
+            do nothing
+
+        else
+            do nothing
+
+        endif
     
     else if head is 7 then
         assume does not end with zero

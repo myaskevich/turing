@@ -81,7 +81,7 @@ class StateRegister(object):
         if isinstance(state, BaseState):
             self._current = self._register[state.getid()]
         else:
-            self._current = self._register[state]
+            self._current = self._register[norm(state)]
 
     def add_state(self, state):
         self._register[state.getid()] = state
