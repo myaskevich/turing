@@ -59,7 +59,7 @@ class Turing(object):
     def assume(self, state):
         self._register.set_current(state)
 
-    def start(self):
+    def start(self, trace=False):
         watch_state = None
         watch_state_iter = 0
 

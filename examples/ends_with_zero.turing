@@ -4,6 +4,7 @@ initial state does not end with zero
     if head is 0 then
         if head is 0 then
             assume ends with zero
+            do write x
 
         else if head is 1 then
             do nothing
@@ -36,6 +37,7 @@ final state ends with zero
 {
     if head is 0 then
         assume ends with zero
+        do write x
 
     else
         assume does not end with zero

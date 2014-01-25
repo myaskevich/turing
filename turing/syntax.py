@@ -9,6 +9,34 @@ from turing.utils.normalize import get_state_name_norm
 norm_state = get_state_name_norm()
 
 
+class TuringSyntaxError(VisitationError):
+    def __init__(self, text, pos):
+        self.text = text
+        self.pos = pos
+
+    def line(self):
+        pos = self.pos
+
+        for i, line in enumerate(self.text.split("\n")):
+            if pos <= len(line):
+                return i
+            else:
+                pos -= len(line) + 1
+
+        return 0
+
+    def column(self):
+        pos = self.pos
+
+        for i, line in enumerate(self.text.split("\n")):
+            if pos <= len(line):
+                return pos + 1
+            else:
+                pos -= len(line) + 1
+
+        return 0
+
+
 rules = """
     program = state*
     _ = ~"\s*"
@@ -21,12 +49,13 @@ rules = """
     state_code = statement*
     state = _ state_modifiers _ "state" _ state_name _ "{" _ state_code _ "}" _
 
-    literal = ~"[a-zA-Z0-9]+"
+    literal = ~"[a-zA-Z0-9]{1}"
     self = _ "self" _
     head = _ "head" _
     ref = self / head
 
-    direction = "right" / "left"
+    junk_direction = ~".*"
+    direction = "right" / "left" / junk_direction
     move = _ "move" _ direction _
     no_move = _ "no" _ "move" _
     movement = move / no_move
@@ -36,13 +65,12 @@ rules = """
     no_action = _ "do" _ "nothing" _
     action = write / erase / no_action
 
-    state_name = ~"[a-zA-Z0-9 ]+"u
+    state_name = ~"[a-zA-Z0-9 ,.]+"u
     state_ref = self / state_name
     assume = _ "assume" _ state_ref _
 
     eq = "is"
-    neq = "is not"
-    eq_neq = eq / neq
+    eq_neq = eq
     condition = _ head _ eq_neq _ literal _
     if_branch = _ "if" _ condition _ "then" _ state_code _
     elif_branch = _ "else" _ "if" _ condition _ "then" _ state_code _
@@ -96,21 +124,22 @@ class TuringSyntaxVisitor(NodeVisitor):
         return "\n".join(child)
 
     def visit_state_name(self, node, child):
-        return norm_state(node.text)
+        return node.text.strip()
 
     def visit_state(self, node, child):
         _, modifiers, _, _, _, name, _, _, _, code, _, _, _ = child
         
-        class_name = name
+        class_name = norm_state(name)
 
         return """
-class %(class_name)s(%(modifiers)s):
+class _%(class_name)s(%(modifiers)s):
     name = '%(name)s'
 
     def _resolve(self, machine):
 %(code)s
+        pass  # handle empty state as well
 
-_states.add(%(class_name)s()) """ % {
+_states.add(_%(class_name)s()) """ % {
         'class_name': class_name,
         'name': name,
         'modifiers': modifiers,
@@ -183,9 +212,6 @@ _states.add(%(class_name)s()) """ % {
     def visit_eq(self, node, child):
         return '=='
 
-    def visit_neq(self, node, child):
-        return '!='
-
     def visit_eq_neq(self, node, child):
         return child[0]
 
@@ -226,6 +252,14 @@ else:
             'elif_branches': elif_branches,
             'else_branch': else_branch[0] if else_branch else "",
         }
+
+
+
+    
+
+    def visit_junk_direction(self, node, child):
+        raise TuringSyntaxError(node.full_text, node.start)
+
 
 def parse(src):
     root = Grammar(rules)["program"].parse(src)

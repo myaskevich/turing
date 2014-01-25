@@ -1,13 +1,14 @@
 
 import optparse
 import sys
+import traceback
 
 from os.path import join, dirname, isfile
 
 from jinja2 import Template
 from parsimonious.exceptions import ParseError
 
-from turing.syntax import parse
+from turing.syntax import parse, TuringSyntaxError
 
 
 TEMPLATE_PATH = join(dirname(__file__), 'templates', 'template.py')
@@ -56,10 +57,14 @@ def main(argv=sys.argv):
         puts("no such file or directory")
         fail("fatal error: no input files")
 
+    compile_source(source, options.output)
+
+
+def compile_source(source, output):
     try:
         node = parse(source)
 
-    except ParseError, e:
+    except (ParseError, TuringSyntaxError), e:
         line, column = e.line(), e.column()
 
         source_lines = source.split("\n")
@@ -70,15 +75,14 @@ def main(argv=sys.argv):
 
         fail("syntax error: invalid syntax at line %d, column %d" % (line, column))
 
+    except Exception, e:
+        traceback.print_exc()
+        fail("Unexpected compilation error")
+
     template_str = open(TEMPLATE_PATH, 'rb').read()
-    Template(template_str).stream(states=node).dump(options.output)
+    Template(template_str).stream(states=node).dump(output)
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception:
-        traceback.print_exc()
-        sys.exit(1)
-
+    main()
     sys.exit(0)

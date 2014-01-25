@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import optparse
 import sys
 import traceback
 
@@ -25,21 +26,54 @@ def make_state_table():
     return table
 
 
-def main(args):
-    msg = "Expected single command line argument, got " + str(len(args))
-    assert len(args) == 2, msg
-    arg = args[1]
+def make_parser():
+    usage = "Usage: %s INPUT" % __file__
+    parser = optparse.OptionParser(usage=usage)
 
-    if isinstance(arg, Tape):
-        src = arg
-    elif os.path.isfile(arg):
-        src = ""
-        with open(arg, 'rb') as file:
-            src = file.read()
+    parser.add_option("-t", "--trace", action='store_true',
+                      dest="trace", default=False,
+                      help="Run program in trace mode")
+
+    return parser
+
+
+def puts(*msg):
+    print "turing:",
+    for m in msg:
+        print m,
+    print
+
+
+def fail(code, *msg):
+    puts(*msg)
+    sys.exit(code)
+
+
+def main(argv=sys.argv):
+    parser = make_parser()
+    options, arguments = parser.parse_args(argv[1:])
+
+    if not arguments:
+        parser.print_usage()
+        fail(1, "fatal error: no input files")
+
+    source = arguments.pop(0)
+
+    run_machine(source, trace=options.trace)
+
+
+def run_machine(source, trace=False):
+
+    if isinstance(source, Tape):
+        raw = source
+    elif os.path.isfile(source):
+        with open(source, 'rb') as file:
+            raw = file.read()
     else:
-        src = arg
+        raw = source
 
-    turing = Turing(src)
+    turing = Turing(raw)
+    start_tape = str(raw)
 
     state_register = make_state_table()
     initial = state_register.get_initial()
@@ -48,40 +82,26 @@ def main(args):
     turing.set_state_register(state_register)
     state_register.set_current(initial.getid())
 
-    EXIT = 0
-
     try:
-        turing.start()
+        puts("started at", "'" + str(initial) + "'")
+        turing.start(trace=trace)
 
-    except TapeIsOverException, e:
-        # print e
+    except (TapeIsOverException, TerminateException), e:
         if turing._register.current in finals:
-            sys.stderr.write("terminated at '" + str(turing._register.current) + "'\n")
+            puts("terminated at", "'" + str(turing._register.current) + "'")
         else:
-            sys.stderr.write("didn't terminate at either " + str(finals) + ". got " + str(turing._register.current) + "\n")
-            EXIT = 1
+            fail(1, "failed at", "'" + str(turing._register.current) + "'")
 
     except TapeError, e:
-        print "tape error:", str(e)
-        EXIT = 2
-
-    except TerminateException, e:
-        if turing._register.current in finals:
-            sys.stderr.write('terminated at ' + str(turing._register.current) + "\n")
-        else:
-            sys.stderr.write("didn't terminate at either " + str(finals) + ". got '" + str(turing._register.current) + "'\n")
-            EXIT = 1
+        fail(2, "tape error:", e)
 
     finally:
-        out_tape = str(turing._tape)
+        end_tape = str(turing._tape)
 
-    return EXIT
+        puts("<-", start_tape)
+        puts("->", end_tape)
 
 
 if __name__ == '__main__':
-    try:
-        sys.exit(main(sys.argv))
-    except Exception:
-        traceback.print_exc()
-        sys.exit(1)
-
+    main()
+    sys.exit(0)
