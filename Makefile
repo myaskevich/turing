@@ -1,9 +1,11 @@
 
 test:
-	nosetests -s turing
+	nosetests turing
 
 sure:
 	pip install mock nose parsimonious jinja2
 
 clean:
-	rm *.turc
+	rm -f *.turc
+	rm -fr dist/
+	rm -fr build/

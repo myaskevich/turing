@@ -14,9 +14,6 @@ state i occurred
     if head is n then
         assume in occurred
 
-    else
-        assume neither of i, n or g occurred
-
     endif
 
     move right
@@ -26,9 +23,6 @@ state in occurred
 {
     if head is g then
         assume ing occurred
-
-    else
-        assume neither of i, n or g occurred
 
     endif
 

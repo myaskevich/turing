@@ -11,7 +11,7 @@ from parsimonious.exceptions import ParseError
 from turing.syntax import parse, TuringSyntaxError
 
 
-TEMPLATE_PATH = join(dirname(__file__), 'templates', 'template.py')
+TEMPLATE_PATH = join(dirname(__file__), 'templates', 'template.txt')
 
 
 def make_parser():
