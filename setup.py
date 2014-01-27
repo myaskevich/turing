@@ -1,6 +1,12 @@
 
 from setuptools import setup, find_packages
 
+# See http://bugs.python.org/issue15881
+try:
+    import multiprocessing
+except ImportError:
+    pass
+
 
 setup(
     name='turing',
