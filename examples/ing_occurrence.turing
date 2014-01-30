@@ -2,6 +2,7 @@
 initial state neither of i, n or g occurred
 {
     if head is i then
+        do write x
         assume i occurred
     
     endif

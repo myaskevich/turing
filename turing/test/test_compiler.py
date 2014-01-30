@@ -1,17 +1,17 @@
 
 import os
 
-from os.path import join, splitext
+from os.path import join, splitext, isfile, isdir
 
 from turing.compiler.main import main, compile_source
 
 
 def turingc_cmd(*args):
-    main(["main.py"] + list(args))
+    main(["main.py", '-d'] + list(args))
 
 
 def turingc(source):
-    compile_source(source, os.devnull)
+    compile_source(source, os.devnull, debug=True)
 
 
 def assert_turingc_ok(source):
@@ -60,9 +60,18 @@ def test_file_argument():
 
 
 def test_compile_examples():
-    for filename in os.listdir("examples"):
-        output = splitext(filename)[0] + '.turc'
-        assert_turingc_cmd_ok(join("examples", filename), '-o', output)
+    def iterdir(path):
+        for filename in os.listdir(path):
+            filepath = join(path, filename)
+
+            if isfile(filepath):
+                output = splitext(filename)[0] + '.turc'
+                assert_turingc_cmd_ok(filepath, '-o', output)
+
+            elif isdir(filepath):
+                iterdir(filepath)
+
+    iterdir('examples')
 
 
 def test_empty_state():

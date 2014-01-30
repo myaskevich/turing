@@ -1,0 +1,23 @@
+
+initial final state no xx
+{
+    if head is x then
+        assume one x
+
+    endif
+
+    move right
+}
+
+
+final state one x {
+    if head is x then
+        do erase
+
+    else
+        assume no xx
+
+    endif
+
+    move right
+}
