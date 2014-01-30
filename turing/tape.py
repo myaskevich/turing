@@ -1,7 +1,7 @@
 
 NULL = ''
 BLANK = ' '
-EXPAND_CHAR = '.'
+EXPAND_CHAR = '_'
 
 
 class TapeError(Exception):
@@ -21,16 +21,19 @@ class Tape(object):
         try:
             return self._tape[self._head]
         except IndexError:
-            raise TapeError("Couldn't read tape at pos %d" % self._head)
+            raise TapeError("couldn't read tape at pos %d" % self._head)
 
     def put(self, item):
         try:
             self._tape[self._head] = item
         except IndexError:
-            raise TapeError("Couldn't write to an empty tape")
+            raise TapeError("couldn't write to an empty tape")
 
     def left(self):
-        raise TapeError("Tape can't be moved back (left)")
+        if self._head == 0:
+            raise TapeIsOverException
+        else:
+            self._head -= 1
 
     def right(self):
         if self._head == len(self._tape) - 1 or len(self._tape) == 0:
@@ -73,8 +76,9 @@ class ExtendableTape(Tape):
     def left(self):
         if self._head == 0:
             self._tape.insert(0, EXPAND_CHAR)
-        else:
-            self._head -= 1
+            self._head += 1
+
+        super(ExtendableTape, self).left()
 
     def right(self):
         if self._head == len(self._tape) - 1:
