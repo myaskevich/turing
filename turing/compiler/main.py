@@ -57,12 +57,19 @@ def main(argv=sys.argv):
         puts("no such file or directory")
         fail("fatal error: no input files")
 
-    compile_source(source, options.output)
+    compile_source(source, options.output, debug=options.debug)
 
 
-def compile_source(source, output):
+def compile_source(source, output, debug=False):
     try:
-        node = parse(source)
+        try:
+            node = parse(source)
+
+        except:
+            if debug:
+                traceback.print_exc()
+
+            raise  # propagate for further handling
 
     except (ParseError, TuringSyntaxError), e:
         line, column = e.line(), e.column()
