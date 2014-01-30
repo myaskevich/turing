@@ -6,8 +6,9 @@ import sys
 import traceback
 
 from turing.runtime.state import UserState, InitialMixin, FinalMixin, \
-    StateRegister
-from turing.runtime.machine import Turing, TerminateException
+    StateRegister, StateError
+from turing.runtime.machine import Turing, TerminateException, \
+    InfiniteStateLoopException
 from turing.tape import TapeError, TapeIsOverException, Tape
 from turing.const import Move, Action
 
@@ -37,6 +38,14 @@ def make_parser():
     return parser
 
 
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+
+
 def puts(*msg):
     print "turing:",
     for m in msg:
@@ -45,8 +54,32 @@ def puts(*msg):
 
 
 def fail(code, *msg):
-    puts(*msg)
+    err(*msg)
     sys.exit(code)
+
+
+def warn(*msg):
+    sys.stdout.write(WARNING)
+    try:
+        puts(*msg)
+    finally:
+        sys.stdout.write(ENDC)
+
+
+def err(*msg):
+    sys.stdout.write(FAIL)
+    try:
+        puts(*msg)
+    finally:
+        sys.stdout.write(ENDC)
+
+
+def ok(*msg):
+    sys.stdout.write(OKGREEN)
+    try:
+        puts(*msg)
+    finally:
+        sys.stdout.write(ENDC)
 
 
 def main(argv=sys.argv):
@@ -75,31 +108,43 @@ def run_machine(source, trace=False):
     turing = Turing(raw)
     start_tape = str(raw)
 
-    state_register = make_state_table()
-    initial = state_register.get_initial()
-    finals = state_register.get_finals()
-
-    turing.set_state_register(state_register)
-    state_register.set_current(initial.getid())
-
     try:
+        try:
+            register = make_state_table()
+            initial = register.get_initial()
+            finals = register.get_finals()
+
+            turing.set_state_register(register)
+            register.set_current(initial.getid())
+
+        except:
+            err("error: couldn't initialize state register")
+            raise
+
         puts("started at", "'" + str(initial) + "'")
         turing.start(trace=trace)
 
     except (TapeIsOverException, TerminateException), e:
-        if turing._register.current in finals:
-            puts("terminated at", "'" + str(turing._register.current) + "'")
+        if register.current in finals:
+            ok("terminated at", "'" + str(register.current) + "'")
         else:
-            fail(1, "failed at", "'" + str(turing._register.current) + "'")
+            fail(1, "failed at", "'" + str(register.current) + "'")
 
     except TapeError, e:
         fail(2, "tape error:", e)
+
+    except StateError, e:
+        fail(3, "state error:", e)
+
+    except InfiniteStateLoopException:
+        fail(4, "error:", "infinite loop at", repr(register.current), "state")
 
     finally:
         end_tape = str(turing._tape)
 
         puts("<-", start_tape)
         puts("->", end_tape)
+        puts("^".rjust(turing._tape._head + 4))
 
 
 if __name__ == '__main__':

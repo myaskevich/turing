@@ -4,6 +4,10 @@ from turing.utils.normalize import get_state_name_norm
 norm = get_state_name_norm()
 
 
+class StateError(Exception):
+    pass
+
+
 class BaseState(object):
     def _initialize(self, machine):
         pass
@@ -57,7 +61,8 @@ class StateRegister(object):
                     return state
             except AttributeError:
                 pass
-        return None
+
+        raise StateError("initial state not defined")
 
     def get_finals(self):
         finals = []
@@ -77,15 +82,17 @@ class StateRegister(object):
 
     def set_current(self, state):
         if isinstance(state, BaseState):
-            self._current = self._register[state.getid()]
+            sid = state.getid()
         else:
-            self._current = self._register[norm(state)]
+            sid = norm(state)
+
+        if sid not in self._register:
+            raise StateError("state '%s' not defined" % state)
+
+        self._current = self._register[sid]
 
     def add_state(self, state):
         self._register[state.getid()] = state
-
-    def get_state(self, name):
-        return self._register[state.getid()]
 
     def __str__(self):
         return str(self._register)

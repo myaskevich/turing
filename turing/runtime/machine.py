@@ -8,6 +8,10 @@ class TerminateException(Exception):
     pass
 
 
+class InfiniteStateLoopException(Exception):
+    pass
+
+
 MAX_STATE_LOOP = 1000000L
 
 
@@ -31,7 +35,7 @@ class Turing(object):
             if direction == Move.LEFT:
                 self._tape.left()
 
-            if direction == Move.RIGHT:
+            elif direction == Move.RIGHT:
                 self._tape.right()
 
             elif direction == Move.NONE:
@@ -39,6 +43,7 @@ class Turing(object):
 
             else:
                 assert 0   # sanity check
+
         except TapeIsOverException:
             raise TapeIsOverException("Tape went over at '%s' state" % str(self._register.current))
 
@@ -68,7 +73,9 @@ class Turing(object):
             current.execute(self)
 
             if current == watch_state:
-                assert watch_state_iter < MAX_STATE_LOOP, "MAX_STATE_LOOP exceeded"
+                if watch_state_iter >= MAX_STATE_LOOP:
+                    raise InfiniteStateLoopException
+
                 watch_state_iter += 1
             else:
                 watch_state = current
