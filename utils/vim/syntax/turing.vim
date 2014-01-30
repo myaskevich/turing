@@ -20,7 +20,7 @@ syn match turingComment "#.*$" contains=turingTodo
 syn match turingNumber '\d\+' display
 syn match turingNumber '[-+]\d\+' display
 syn match turingNoAction 'no\s\+move' display
-syn match turingStateModifier '\(initial\|final\)\s\+state' display
+syn match turingStateModifier '\(initial\s\+\|final\s\+\)*\(initial\s\+\|final\s\+\)*state' display
 syn match turingStateName 'state\s\*\(\.\*\)' display
 
 " Regions

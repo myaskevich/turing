@@ -44,10 +44,9 @@ rules = """
     initial_state_modifier = "initial"
     final_state_modifier = "final"
     state_modifier = initial_state_modifier / final_state_modifier
-    state_modifiers = state_modifier*
     state_name = ~"[ a-zA-Z0-9_]+"
     state_code = statement*
-    state = _ state_modifiers _ "state" _ state_name _ "{" _ state_code _ "}" _
+    state = _ state_modifier* _ state_modifier* _ "state" _ state_name _ "{" _ state_code _ "}" _
 
     literal = ~"[a-zA-Z0-9]{1}"
     self = _ "self" _
@@ -111,13 +110,8 @@ class TuringSyntaxVisitor(NodeVisitor):
     def visit_final_state_modifier(self, node, child):
         return "FinalMixin"
 
-    def visit_state_modifiers(self, node, child):
-        modifiers = ["UserState"]
-
-        for modifier in child:
-            modifiers.append(modifier[0])
-
-        return ", ".join(modifiers)
+    def visit_state_modifier(self, node, child):
+        return child[0]
 
     @indent(level=2)
     def visit_state_code(self, node, child):
@@ -127,9 +121,15 @@ class TuringSyntaxVisitor(NodeVisitor):
         return node.text.strip()
 
     def visit_state(self, node, child):
-        _, modifiers, _, _, _, name, _, _, _, code, _, _, _ = child
+        _, modifier1, _, modifier2, _, _, _, name, _, _, _, code, _, _, _ = child
         
         class_name = norm_state(name)
+
+        modifiers = ["UserState"]
+        if modifier1:
+            modifiers.append(modifier1[0])
+        if modifier2:
+            modifiers.append(modifier2[0])
 
         return """
 class _%(class_name)s(%(modifiers)s):
@@ -142,7 +142,7 @@ class _%(class_name)s(%(modifiers)s):
 _states.add(_%(class_name)s()) """ % {
         'class_name': class_name,
         'name': name,
-        'modifiers': modifiers,
+        'modifiers': ', '.join(modifiers),
         'code': code,
     }
 
