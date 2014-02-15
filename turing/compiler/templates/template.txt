@@ -142,7 +142,7 @@ def run_machine(source, trace=False):
     except (TapeIsOverException, TerminateException), e:
         if register.current in finals:
             ok("terminated at", "'" + str(register.current) + "'")
-            pipe(str(turing._tape))
+            pipe(str(turing._tape) + '\n')
         else:
             fail(1, "failed at", "'" + str(register.current) + "'")
 
@@ -160,7 +160,7 @@ def run_machine(source, trace=False):
 
         puts("<-", repr(start_tape))
         puts("->", repr(end_tape))
-        puts("^".rjust(turing._tape._head + 4))
+        puts("^".rjust(turing._tape._head + 5))
 
 
 if __name__ == '__main__':
