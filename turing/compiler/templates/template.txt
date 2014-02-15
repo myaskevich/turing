@@ -14,9 +14,7 @@ from turing.const import Move, Action
 
 
 _states = set()
-{% for state in states %}
-{{ state }}
-{% endfor %}
+%{STATES_ARE_INSERTED_HERE}
 
 def make_state_table():
     table = StateRegister()
@@ -94,6 +92,7 @@ def main(argv=sys.argv):
     parser = make_parser()
     options, arguments = parser.parse_args(argv[1:])
 
+    # `./a.turc 11010203`
     if sys.stdin.isatty():
         if not arguments:
             parser.print_usage()
@@ -101,6 +100,7 @@ def main(argv=sys.argv):
 
         source = arguments.pop(0)
 
+    # `echo 11010203 | ./a.turc` kind of situation
     else:
         source = sys.stdin.read().strip()
 

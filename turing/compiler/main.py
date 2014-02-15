@@ -5,7 +5,6 @@ import traceback
 
 from os.path import join, dirname, isfile
 
-from jinja2 import Template
 from parsimonious.exceptions import ParseError
 
 from turing.syntax import parse, TuringSyntaxError
@@ -87,7 +86,10 @@ def compile_source(source, output, debug=False):
         fail("Unexpected compilation error")
 
     template_str = open(TEMPLATE_PATH, 'rb').read()
-    Template(template_str).stream(states=node).dump(output)
+    out_str = template_str.replace("%{STATES_ARE_INSERTED_HERE}", "\n\n".join(node))
+    out = open(output, 'w')
+    out.write(out_str)
+    out.close()
 
 
 if __name__ == '__main__':

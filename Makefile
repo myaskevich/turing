@@ -3,7 +3,7 @@ test:
 	nosetests turing
 
 sure:
-	pip install mock nose parsimonious jinja2
+	pip install mock nose parsimonious
 
 clean:
 	rm -f *.turc
