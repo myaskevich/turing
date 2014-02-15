@@ -1,6 +1,8 @@
 
 import optparse
+import os
 import sys
+import stat
 import traceback
 
 from os.path import join, dirname, isfile
@@ -90,6 +92,12 @@ def compile_source(source, output, debug=False):
     out = open(output, 'w')
     out.write(out_str)
     out.close()
+
+    if output != os.devnull:
+        try:
+            os.chmod(output, os.stat(output).st_mode | stat.S_IEXEC)
+        except OSError:
+            puts('error: failed to set permissions')
 
 
 if __name__ == '__main__':
