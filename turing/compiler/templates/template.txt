@@ -35,6 +35,10 @@ def make_parser():
                       dest="trace", default=False,
                       help="Run program in trace mode")
 
+    parser.add_option("-d", "--debug", action='store_true',
+                      dest="debug", default=False,
+                      help="Use debug mode")
+
     return parser
 
 
@@ -47,10 +51,10 @@ ENDC = '\033[0m'
 
 
 def puts(*msg):
-    print "turing:",
+    print >> sys.stderr, __file__ + ":",
     for m in msg:
-        print m,
-    print
+        print >> sys.stderr, m,
+    print >> sys.stderr
 
 
 def fail(code, *msg):
@@ -59,44 +63,55 @@ def fail(code, *msg):
 
 
 def warn(*msg):
-    sys.stdout.write(WARNING)
+    sys.stderr.write(WARNING)
     try:
         puts(*msg)
     finally:
-        sys.stdout.write(ENDC)
+        sys.stderr.write(ENDC)
 
 
 def err(*msg):
-    sys.stdout.write(FAIL)
+    sys.stderr.write(FAIL)
     try:
         puts(*msg)
     finally:
-        sys.stdout.write(ENDC)
+        sys.stderr.write(ENDC)
 
 
 def ok(*msg):
-    sys.stdout.write(OKGREEN)
+    sys.stderr.write(OKGREEN)
     try:
         puts(*msg)
     finally:
-        sys.stdout.write(ENDC)
+        sys.stderr.write(ENDC)
+
+
+def pipe(string):
+    sys.stdout.write(string)
 
 
 def main(argv=sys.argv):
     parser = make_parser()
     options, arguments = parser.parse_args(argv[1:])
 
-    if not arguments:
-        parser.print_usage()
-        fail(1, "fatal error: no input files")
+    if sys.stdin.isatty():
+        if not arguments:
+            parser.print_usage()
+            fail(1, "fatal error: no input")
 
-    source = arguments.pop(0)
+        source = arguments.pop(0)
+
+    else:
+        source = sys.stdin.read().strip()
+
+    if not options.debug:
+        global puts
+        puts = lambda *msg: None
 
     run_machine(source, trace=options.trace)
 
 
 def run_machine(source, trace=False):
-
     if isinstance(source, Tape):
         raw = source
     elif os.path.isfile(source):
@@ -127,6 +142,7 @@ def run_machine(source, trace=False):
     except (TapeIsOverException, TerminateException), e:
         if register.current in finals:
             ok("terminated at", "'" + str(register.current) + "'")
+            pipe(str(turing._tape))
         else:
             fail(1, "failed at", "'" + str(register.current) + "'")
 
@@ -142,8 +158,8 @@ def run_machine(source, trace=False):
     finally:
         end_tape = str(turing._tape)
 
-        puts("<-", start_tape)
-        puts("->", end_tape)
+        puts("<-", repr(start_tape))
+        puts("->", repr(end_tape))
         puts("^".rjust(turing._tape._head + 4))
 
 
